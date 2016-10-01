@@ -19,8 +19,7 @@ class Problem:
 
 if __name__ == "__main__":
 
-    s = int( input("Length of cube? ") )
-    init = RubikCube(s)
+    init = RubikCube(3)
     n = int( input("Randomize by how many moves? ") )
     init.randomize(n)
     print(init)
