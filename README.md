@@ -2,8 +2,8 @@
 Rubik's cube solver
 
 # Rubik's actions
-move(direction,row/column) where valid directions are 'up', 'down', 'left', 'right'
-rotate(row/column)
+<b>move</b>(direction,row/column) where valid directions are '<b>up</b>', '<b>down</b>', '<b>left</b>', '<b>right</b>'  
+<b>rotate</b>(row/column)
 
 # Testing
 Run problem.py as main
