@@ -11,7 +11,7 @@ class Agent:
         return all([ row[1:] == row[:-1] and row == state[0][0] for row in state[0] ]) and Agent.isGoal(state[1:])
 
     def heuristic(state):
-        values = [ Agent.heuristic1(state), Agent.heuristic2(state) ]
+        values = [ Agent.heuristic1(state), Agent.heuristic2(state), Agent.heuristic3(state) ]
         return reduce(lambda x,y: x if x > y else y, values, values[0])
 
     #Number of faces unsolved
@@ -42,6 +42,26 @@ class Agent:
         lst += [ state[4][2][0] == state[4][1][1] and state[5][0][0] == state[5][1][1] and state[1][2][0] == state[1][1][1] ]
         #lower right
         lst += [ state[4][2][2] == state[4][1][1] and state[5][2][0] == state[5][1][1] and state[3][2][2] == state[3][1][1] ]
+
+        return lst.count(False)
+
+    #Number of edges displaced
+    def heuristic3(state):
+        #Top cubies
+        lst = [ state[0][0][1] == state[0][1][1] and state[5][2][1] == state[5][1][1] ]
+        lst += [ state[0][1][0] == state[0][1][1] and state[1][0][1] == state[1][1][1] ]
+        lst += [ state[0][1][2] == state[0][1][1] and state[3][0][1] == state[3][1][1] ]
+        lst += [ state[0][2][1] == state[0][1][1] and state[2][0][1] == state[2][1][1] ]
+        #Side cubies
+        lst += [ state[1][1][0] == state[1][1][1] and state[5][1][0] == state[5][1][1] ]
+        lst += [ state[1][1][2] == state[1][1][1] and state[2][1][0] == state[2][1][1] ]
+        lst += [ state[3][1][0] == state[3][1][1] and state[2][1][2] == state[2][2][1] ]
+        lst += [ state[3][1][2] == state[3][1][1] and state[5][1][2] == state[5][1][1] ]
+        #Bottom cubies
+        lst += [ state[4][0][1] == state[4][1][1] and state[2][2][1] == state[2][1][1] ]
+        lst += [ state[4][1][0] == state[4][1][1] and state[1][2][1] == state[1][1][1] ]
+        lst += [ state[4][1][2] == state[4][1][1] and state[3][2][1] == state[3][1][1] ]
+        lst += [ state[4][2][1] == state[4][1][1] and state[5][0][1] == state[5][1][1] ]
 
         return lst.count(False)
 
