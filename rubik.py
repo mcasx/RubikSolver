@@ -47,16 +47,24 @@ class RubikCube:
             face = self.state[self.BOTTOM][:]
             right = self.__cwQuarterTurn(self.state[self.RIGHT][:])
             bottom = self.state[self.BACK][:]
+            bottom = self.__cwQuarterTurn(bottom[:])
+            bottom = self.__cwQuarterTurn(bottom[:])
             back = self.state[self.TOP][:]
+            back = self.__cwQuarterTurn(back[:])
+            back = self.__cwQuarterTurn(back[:])
 
         elif direction == 'down':
             top = self.state[self.BACK][:]
+            top = self.__cwQuarterTurn(top[:])
+            top = self.__cwQuarterTurn(top[:])
             left = self.__cwQuarterTurn(self.state[self.LEFT][:])
             face = self.state[self.TOP][:]
             right = self.__ccwQuarterTurn(self.state[self.RIGHT][:])
             bottom = self.state[self.FACE][:]
             back = self.state[self.BOTTOM][:]
-
+            back = self.__cwQuarterTurn(back[:])
+            back = self.__cwQuarterTurn(back[:])
+             
         elif direction == 'left':
             top = self.__cwQuarterTurn(self.state[self.TOP][:])
             left = self.state[self.FACE][:]
@@ -67,11 +75,11 @@ class RubikCube:
 
         elif direction == 'right':
             top = self.__ccwQuarterTurn(self.state[self.TOP][:])
-            left = self.state[self.FACE][:]
-            face = self.state[self.RIGHT][:]
-            right = self.state[self.BACK][:]
+            left = self.state[self.BACK][:]
+            face = self.state[self.LEFT][:]
+            right = self.state[self.FACE][:]
             bottom = self.__cwQuarterTurn(self.state[self.BOTTOM][:])
-            back = self.state[self.LEFT][:]
+            back = self.state[self.RIGHT][:]
 
         self.state[self.TOP]  = top
         self.state[self.LEFT]  = left
@@ -95,8 +103,12 @@ class RubikCube:
             for i in range(self.size):
                 top[i][rowcolumn] = self.state[self.FACE][i][rowcolumn]
                 face[i][rowcolumn] = self.state[self.BOTTOM][i][rowcolumn]
-                bottom[i][rowcolumn] = self.state[self.BACK][i][rowcolumn] 
+                bottom[i][rowcolumn] = self.state[self.BACK][i][rowcolumn]
+                bottom = self.__cwQuarterTurn(bottom[:])
+                bottom = self.__cwQuarterTurn(bottom[:])
                 back[i][rowcolumn] = self.state[self.TOP][i][rowcolumn]
+                back = self.__cwQuarterTurn(back[:])
+                back = self.__cwQuarterTurn(back[:])
 
             if rowcolumn == 0:
                 left = self.__ccwQuarterTurn(left)
@@ -106,10 +118,15 @@ class RubikCube:
 
         if direction == 'down':
             for i in range(self.size):
-                top[i][rowcolumn] = self.state[self.BACK][i][rowcolumn] 
+                top[i][rowcolumn] = self.state[self.BACK][i][rowcolumn]
+                top = self.__cwQuarterTurn(top[:])
+                top = self.__cwQuarterTurn(top[:])
                 face[i][rowcolumn] = self.state[self.TOP][i][rowcolumn] 
                 bottom[i][rowcolumn] = self.state[self.FACE][i][rowcolumn] 
-                back[i][rowcolumn] = self.state[self.BOTTOM][i][rowcolumn] 
+                back[i][rowcolumn] = self.state[self.BOTTOM][i][rowcolumn]
+                back = self.__cwQuarterTurn(back[:])
+                back = self.__cwQuarterTurn(back[:])
+
 
             if rowcolumn == 0:
                 left = self.__cwQuarterTurn(left)

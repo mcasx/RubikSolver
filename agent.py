@@ -2,6 +2,7 @@ from rubik import RubikCube
 from node import Node
 import heapq
 from functools import reduce
+import math
 
 class Agent:
     def isGoal(state):
@@ -25,9 +26,9 @@ class Agent:
     def heuristic2(state):
         #Top cubies
         #upper left
-        lst = [ state[0][0][0] == state[0][1][1] and state[5][2][0] == state[5][1][1] and state[1][0][0] == state[1][1][1] ]
+        lst = [ state[0][0][0] == state[0][1][1] and state[5][0][2] == state[5][1][1] and state[1][0][0] == state[1][1][1] ]
         #upper right 
-        lst += [ state[0][0][2] == state[0][1][1] and state[5][2][2] == state[5][1][1] and state[3][2][0] == state[3][1][1] ]
+        lst += [ state[0][0][2] == state[0][1][1] and state[5][0][0] == state[5][1][1] and state[3][0][2] == state[3][1][1] ]
         #lower left
         lst += [ state[0][2][0] == state[0][1][1] and state[2][0][0] == state[2][1][1] and state[1][0][2] == state[1][1][1] ]
         #lower right
@@ -39,10 +40,9 @@ class Agent:
         #upper right
         lst += [ state[4][0][2] == state[4][1][1] and state[2][2][2] == state[2][1][1] and state[3][2][0] == state[3][1][1] ]
         #lower left
-        lst += [ state[4][2][0] == state[4][1][1] and state[5][0][0] == state[5][1][1] and state[1][2][0] == state[1][1][1] ]
+        lst += [ state[4][2][0] == state[4][1][1] and state[5][2][2] == state[5][1][1] and state[1][2][0] == state[1][1][1] ]
         #lower right
         lst += [ state[4][2][2] == state[4][1][1] and state[5][2][0] == state[5][1][1] and state[3][2][2] == state[3][1][1] ]
-
         return lst.count(False)
 
     #Number of edges displaced
@@ -65,7 +65,43 @@ class Agent:
 
         return lst.count(False)
 
-    def search(startCube):
+    def idaStarMain(startCube):
+        node = Node(startCube,0,Agent.heuristic(startCube.state),None,None)
+        bound = node.totalCost
+        while bound < math.inf:
+            bound = Agent.idaStar(node,bound)
+            if type(bound) is Node:
+                return bound.getPath()
+
+        return None
+
+
+    def idaStar(node,bound):
+        if Agent.isGoal(node.cube.state):
+            return node
+
+        fn = math.inf
+        for x in node.cube.getActions():
+            childCube = RubikCube(state = node.cube.state)
+            if x[0] in ('up','down','left','right'):
+                childCube.move(x[0], x[1])
+            else:
+                childCube.rotate(x[1])
+            
+            child = Node( childCube, node.cost+1, Agent.heuristic(childCube.state), (x[0], x[1]), node)
+            if child.totalCost <= bound:
+                m = Agent.idaStar(child,bound)
+                if type(m) is Node:
+                    return m
+                fn = m if m < fn else fn
+
+            else:
+                fn = child.totalCost if child.totalCost < fn else fn
+
+        return fn
+
+
+    def aStar(startCube):
         node = Node(startCube,0,Agent.heuristic(startCube.state),None,None)
         frontier = []
         heapq.heappush(frontier, node)
