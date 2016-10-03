@@ -12,18 +12,11 @@ class Agent:
         return all([ row[1:] == row[:-1] and row == state[0][0] for row in state[0] ]) and Agent.isGoal(state[1:])
 
     def heuristic(state):
-        values = [ Agent.heuristic1(state), Agent.heuristic2(state), Agent.heuristic3(state) ]
+        values = [Agent.heuristic1(state)/4, Agent.heuristic2(state)/4 ]
         return reduce(lambda x,y: x if x > y else y, values, values[0])
 
-    #Number of faces unsolved
-    def heuristic1(state):
-        if state == []:
-            return 0
-
-        return (0 if all([ row[1:] == row[:-1] and row == state[0][0] for row in state[0] ]) else 1) + Agent.heuristic1(state[1:])
-
     #Number of corners cubies displaced
-    def heuristic2(state):
+    def heuristic1(state):
         #Top cubies
         #upper left
         lst = [ state[0][0][0] == state[0][1][1] and state[5][0][2] == state[5][1][1] and state[1][0][0] == state[1][1][1] ]
@@ -46,7 +39,7 @@ class Agent:
         return lst.count(False)
 
     #Number of edges displaced
-    def heuristic3(state):
+    def heuristic2(state):
         #Top cubies
         lst = [ state[0][0][1] == state[0][1][1] and state[5][2][1] == state[5][1][1] ]
         lst += [ state[0][1][0] == state[0][1][1] and state[1][0][1] == state[1][1][1] ]
@@ -99,40 +92,3 @@ class Agent:
                 fn = child.totalCost if child.totalCost < fn else fn
 
         return fn
-
-
-    def aStar(startCube):
-        node = Node(startCube,0,Agent.heuristic(startCube.state),None,None)
-        frontier = []
-        heapq.heappush(frontier, node)
-        explored = []
-        
-        while True:
-            if frontier == []:
-                return None
-
-            node = heapq.heappop(frontier)
-            if Agent.isGoal(node.cube.state):
-                return node.getPath()
-           
-            if node.cube.state not in explored:
-                explored += [node.cube.state]
-
-            for x in node.cube.getActions():
-                childCube = RubikCube(state = node.cube.state)
-                if x[0] in ('up','down','left','right'):
-                    childCube.move(x[0], x[1])
-                else:
-                    childCube.rotate(x[1])
-                
-                child = Node( childCube, node.cost+1, Agent.heuristic(childCube.state), (x[0], x[1]), node)
-
-                if child.cube.state not in explored and child not in frontier:
-                    heapq.heappush(frontier, child)
-
-                elif child in frontier:
-                    i = frontier.index(child)
-                    if frontier[i].cost > child.cost:
-                        frontier.remove(frontier[i])
-                        heapq.heapify(frontier)
-                        heapq.heappush(frontier, child)
