@@ -19,11 +19,11 @@ class Problem:
 
 if __name__ == "__main__":
 
-    init = RubikCube(3)
+    r = RubikCube()
     n = int( input("Randomize by how many moves? ") )
-    init.randomize(n)
-    print(init)
-    pidaStar = Problem(init)
+    r.randomize(n)
+    print(r)
+    pidaStar = Problem(r)
     
     pidaStar.solve()
     print("Time: {}s".format("%.3f"%pidaStar.timeElapsed))

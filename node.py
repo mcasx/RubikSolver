@@ -4,13 +4,13 @@ class Node:
         self.cost = cost
         self.expectedCost = expectedCost
         self.totalCost = cost + expectedCost
-        self.action = action    #action is a tuple with a direction (up,down,left,right) and number(row or column)
+        self.action = action  
         self.parent = parent
    
     def __eq__(self,other):
         if other == None:
             return None
-        return self.cube.state == other.cube.state
+        return self.cube == other.cube
 
     def __lt__(self,other):
         return self.totalCost < other.totalCost

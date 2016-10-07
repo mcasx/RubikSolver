@@ -1,62 +1,77 @@
 from rubik import RubikCube
 from node import Node
 import heapq
-from functools import reduce
 import math
+import itertools
 
 class Agent:
     def isGoal(state):
-        if state == []:
-            return True
-     
-        return all([ row[1:] == row[:-1] and row == state[0][0] for row in state[0] ]) and Agent.isGoal(state[1:])
+        top = [ cubie.cz for cubie in state if cubie.z == 1 ]
+        left = [ cubie.cx for cubie in state if cubie.x == -1 ]
+        face = [ cubie.cy for cubie in state if cubie.y == -1 ]
+        right = [ cubie.cx for cubie in state if cubie.x == 1 ]
+        bottom = [ cubie.cz for cubie in state if cubie.z == -1 ]
+        back = [ cubie.cy for cubie in state if cubie.y == 1 ]
+
+        return top[1:] == top[:-1] and left[1:] == left[:-1] and face[1:] == face[:-1] and right[1:] == right[:-1] and bottom[1:] == bottom[:-1] and back[1:] == back[:-1] 
+
+    def manhattan_Dist3D(cubie):
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','Y','W']):
+            return abs(cubie.x+1) + abs(cubie.y-1) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','Y','W']):
+            return abs(cubie.x-1) + abs(cubie.y-1) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','G','W']):
+            return abs(cubie.x+1) + abs(cubie.y+1) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','G','W']):
+            return abs(cubie.x-1) + abs(cubie.y+1) + abs(cubie.z-1)
+        
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','Y','B']):
+            return abs(cubie.x+1) + abs(cubie.y-1) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','Y','B']):
+            return abs(cubie.x-1) + abs(cubie.y-1) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','G','B']):
+            return abs(cubie.x+1) + abs(cubie.y+1) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','G','B']):
+            return abs(cubie.x-1) + abs(cubie.y+1) + abs(cubie.z+1)
+        
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','W',None]):
+            return abs(cubie.x+1) + abs(cubie.y) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['Y','W',None]):
+            return abs(cubie.x) + abs(cubie.y-1) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','W',None]):
+            return abs(cubie.x-1) + abs(cubie.y) + abs(cubie.z-1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['G','W',None]):
+            return abs(cubie.x) + abs(cubie.y+1) + abs(cubie.z-1)
+        
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','Y',None]):
+            return abs(cubie.x+1) + abs(cubie.y-1) + abs(cubie.z)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','Y',None]):
+            return abs(cubie.x-1) + abs(cubie.y-1) + abs(cubie.z)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','G',None]):
+            return abs(cubie.x-1) + abs(cubie.y+1) + abs(cubie.z)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','G',None]):
+            return abs(cubie.x+1) + abs(cubie.y+1) + abs(cubie.z)
+        
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['O','B',None]):
+            return abs(cubie.x+1) + abs(cubie.y) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['Y','B',None]):
+            return abs(cubie.x) + abs(cubie.y-1) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['R','B',None]):
+            return abs(cubie.x-1) + abs(cubie.y) + abs(cubie.z+1)
+        if (cubie.cx,cubie.cy,cubie.cz) in itertools.permutations(['G','B',None]):
+            return abs(cubie.x) + abs(cubie.y+1) + abs(cubie.z+1)
 
     def heuristic(state):
-        values = [Agent.heuristic1(state)/4, Agent.heuristic2(state)/4 ]
-        return reduce(lambda x,y: x if x > y else y, values, values[0])
+        values = [Agent.heuristic1(state), Agent.heuristic2(state) ]
+        return values[0] if values[0] > values[1] else values[1]
 
     #Number of corners cubies displaced
     def heuristic1(state):
-        #Top cubies
-        #upper left
-        lst = [ state[0][0][0] == state[0][1][1] and state[5][0][2] == state[5][1][1] and state[1][0][0] == state[1][1][1] ]
-        #upper right 
-        lst += [ state[0][0][2] == state[0][1][1] and state[5][0][0] == state[5][1][1] and state[3][0][2] == state[3][1][1] ]
-        #lower left
-        lst += [ state[0][2][0] == state[0][1][1] and state[2][0][0] == state[2][1][1] and state[1][0][2] == state[1][1][1] ]
-        #lower right
-        lst += [ state[0][2][2] == state[0][1][1] and state [2][0][2] == state[2][1][1] and state[3][0][0] == state[3][1][1] ]
-
-        #Bottom cubies
-        #upper left
-        lst += [ state[4][0][0] == state[4][1][1] and state[2][2][0] == state[2][1][1] and state[1][2][2] == state[1][1][1] ]
-        #upper right
-        lst += [ state[4][0][2] == state[4][1][1] and state[2][2][2] == state[2][1][1] and state[3][2][0] == state[3][1][1] ]
-        #lower left
-        lst += [ state[4][2][0] == state[4][1][1] and state[5][2][2] == state[5][1][1] and state[1][2][0] == state[1][1][1] ]
-        #lower right
-        lst += [ state[4][2][2] == state[4][1][1] and state[5][2][0] == state[5][1][1] and state[3][2][2] == state[3][1][1] ]
-        return lst.count(False)
+        return sum([ Agent.manhattan_Dist3D(state[i]) for i in range(6,14) ])/4
 
     #Number of edges displaced
     def heuristic2(state):
-        #Top cubies
-        lst = [ state[0][0][1] == state[0][1][1] and state[5][2][1] == state[5][1][1] ]
-        lst += [ state[0][1][0] == state[0][1][1] and state[1][0][1] == state[1][1][1] ]
-        lst += [ state[0][1][2] == state[0][1][1] and state[3][0][1] == state[3][1][1] ]
-        lst += [ state[0][2][1] == state[0][1][1] and state[2][0][1] == state[2][1][1] ]
-        #Side cubies
-        lst += [ state[1][1][0] == state[1][1][1] and state[5][1][0] == state[5][1][1] ]
-        lst += [ state[1][1][2] == state[1][1][1] and state[2][1][0] == state[2][1][1] ]
-        lst += [ state[3][1][0] == state[3][1][1] and state[2][1][2] == state[2][2][1] ]
-        lst += [ state[3][1][2] == state[3][1][1] and state[5][1][2] == state[5][1][1] ]
-        #Bottom cubies
-        lst += [ state[4][0][1] == state[4][1][1] and state[2][2][1] == state[2][1][1] ]
-        lst += [ state[4][1][0] == state[4][1][1] and state[1][2][1] == state[1][1][1] ]
-        lst += [ state[4][1][2] == state[4][1][1] and state[3][2][1] == state[3][1][1] ]
-        lst += [ state[4][2][1] == state[4][1][1] and state[5][0][1] == state[5][1][1] ]
-
-        return lst.count(False)
+        return sum([ Agent.manhattan_Dist3D(state[i]) for i in range(14,26) ])/4
 
     def idaStarMain(startCube):
         node = Node(startCube,0,Agent.heuristic(startCube.state),None,None)
@@ -76,11 +91,7 @@ class Agent:
         fn = math.inf
         for x in node.cube.getActions():
             childCube = RubikCube(state = node.cube.state)
-            if x[0] in ('up','down','left','right'):
-                childCube.move(x[0], x[1])
-            else:
-                childCube.rotate(x[1])
-            
+            childCube.rotate(x[0],x[1])
             child = Node( childCube, node.cost+1, Agent.heuristic(childCube.state), (x[0], x[1]), node)
             if child.totalCost <= bound:
                 m = Agent.idaStar(child,bound)

@@ -1,197 +1,91 @@
 import random
-from copy import deepcopy
+import copy
+
+class Cubie:
+    def __init__(self, x,y,z,cx = None,cy = None,cz = None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.cx = cx
+        self.cy = cy
+        self.cz = cz
+
+    def __eq__(self,other):
+        return (self.x, self.y, self.z, self.cx, self.cy, self.cz) == (other.x, other.y, other.z, other.cx, other.cy, other.cz)
+
+    def __str__(self):
+        return '(' + str(self.x) + ',' + str(self.y) + ',' + str(self.z) + '), cx = ' + str(self.cx or 'None') + ', cy = ' + str(self.cy or 'None') + ', cz = ' + str(self.cz or 'None')
 
 class RubikCube:
-    def __init__(self,size = 3,state = None):
-        self.TOP = 0
-        self.LEFT = 1
-        self.FACE = 2
-        self.RIGHT = 3
-        self.BOTTOM = 4
-        self.BACK = 5
-        if state:
-            self.size = len(state[0])
-            self.state = list(state)
+    def __init__(self,state = None):
+        if state != None:
+            self.state = copy.deepcopy(state)
         else:
-            assert size >= 0, "Size has to be positive"
-            self.size = size
-            self.state = [\
-                [ [0]*size for y in range(size) ],\
-                [ [1]*size for y in range(size) ],\
-                [ [2]*size for y in range(size) ],\
-                [ [3]*size for y in range(size) ],\
-                [ [4]*size for y in range(size) ],\
-                [ [5]*size for y in range(size) ] ]
-
-    def __cwQuarterTurn(self,face):
-        temp = [ [-1]*self.size for y in range(self.size) ]
-        for i in range(self.size):
-                for j in range(self.size):
-                    temp[i][j] = face[j][i]
-
-        return temp
-    
-    def __ccwQuarterTurn(self,face):
-        temp = [ [-1]*self.size for y in range(self.size) ]
-        for i in range(self.size):
-                for j in range(self.size):
-                    temp[i][j] = face[j][self.size-1-i]
-
-        return temp
- 
-    def rotate(self,direction):
-        assert direction == 'up' or direction == 'down' or direction == 'left' or direction == 'right', "Wrong direction: {}".format(direction)
-        if direction == 'up':
-            top = self.state[self.FACE][:]
-            left = self.__ccwQuarterTurn(self.state[self.LEFT][:])
-            face = self.state[self.BOTTOM][:]
-            right = self.__cwQuarterTurn(self.state[self.RIGHT][:])
-            bottom = self.state[self.BACK][:]
-            bottom = self.__cwQuarterTurn(bottom[:])
-            bottom = self.__cwQuarterTurn(bottom[:])
-            back = self.state[self.TOP][:]
-            back = self.__cwQuarterTurn(back[:])
-            back = self.__cwQuarterTurn(back[:])
-
-        elif direction == 'down':
-            top = self.state[self.BACK][:]
-            top = self.__cwQuarterTurn(top[:])
-            top = self.__cwQuarterTurn(top[:])
-            left = self.__cwQuarterTurn(self.state[self.LEFT][:])
-            face = self.state[self.TOP][:]
-            right = self.__ccwQuarterTurn(self.state[self.RIGHT][:])
-            bottom = self.state[self.FACE][:]
-            back = self.state[self.BOTTOM][:]
-            back = self.__cwQuarterTurn(back[:])
-            back = self.__cwQuarterTurn(back[:])
-             
-        elif direction == 'left':
-            top = self.__cwQuarterTurn(self.state[self.TOP][:])
-            left = self.state[self.FACE][:]
-            face = self.state[self.RIGHT][:]
-            right = self.state[self.BACK][:]
-            bottom = self.__ccwQuarterTurn(self.state[self.BOTTOM][:])
-            back = self.state[self.LEFT][:]
-
-        elif direction == 'right':
-            top = self.__ccwQuarterTurn(self.state[self.TOP][:])
-            left = self.state[self.BACK][:]
-            face = self.state[self.LEFT][:]
-            right = self.state[self.FACE][:]
-            bottom = self.__cwQuarterTurn(self.state[self.BOTTOM][:])
-            back = self.state[self.RIGHT][:]
-
-        self.state[self.TOP]  = top
-        self.state[self.LEFT]  = left
-        self.state[self.FACE]  = face
-        self.state[self.RIGHT]  = right
-        self.state[self.BOTTOM]  = bottom
-        self.state[self.BACK]  = back
-
-    def move(self, direction, rowcolumn):
-        assert direction == 'up' or direction == 'down' or direction == 'left' or direction == 'right', "Wrong direction: {}".format(direction)
-        assert rowcolumn >=0 and rowcolumn < self.size, "Invalid row/column number: {}".format(rowcolumn)
-
-        top = deepcopy(self.state[self.TOP])
-        left = deepcopy(self.state[self.LEFT])
-        face = deepcopy(self.state[self.FACE])
-        right = deepcopy(self.state[self.RIGHT])
-        bottom = deepcopy(self.state[self.BOTTOM])
-        back = deepcopy(self.state[self.BACK])
-
-        if direction == 'up': 
-            for i in range(self.size):
-                top[i][rowcolumn] = self.state[self.FACE][i][rowcolumn]
-                face[i][rowcolumn] = self.state[self.BOTTOM][i][rowcolumn]
-                bottom[i][rowcolumn] = self.state[self.BACK][2-i][rowcolumn]
-                back[2-i][rowcolumn] = self.state[self.TOP][i][rowcolumn]
-
-            if rowcolumn == 0:
-                left = self.__ccwQuarterTurn(left)
-
-            if rowcolumn == self.size - 1:
-                right = self.__cwQuarterTurn(right)
-
-        if direction == 'down':
-            for i in range(self.size):
-                top[i][rowcolumn] = self.state[self.BACK][2-i][rowcolumn]
-                face[i][rowcolumn] = self.state[self.TOP][i][rowcolumn] 
-                bottom[i][rowcolumn] = self.state[self.FACE][i][rowcolumn] 
-                back[2-i][rowcolumn] = self.state[self.BOTTOM][i][rowcolumn]
-
-
-            if rowcolumn == 0:
-                left = self.__cwQuarterTurn(left)
-
-            if rowcolumn == self.size - 1:
-                right = self.__ccwQuarterTurn(right)
+            #Centers
+            self.state = [ Cubie(0,0,1, cz = 'W'), Cubie(-1,0,0, cx = 'O'), Cubie(1,0,0, cx = 'R'), Cubie(0,0,-1, cz = 'B'), Cubie(0,1,0, cy = 'Y'), Cubie(0,-1,0, cy = 'G')]
+            #Top Corners
+            self.state += [ Cubie(-1,1,1, cx = 'O', cy = 'Y', cz = 'W'), Cubie(1,1,1, cx = 'R', cy = 'Y', cz = 'W'), Cubie(-1,-1,1, cx = 'O', cy = 'G', cz = 'W'), Cubie(1,-1,1, cx = 'R', cy = 'G', cz = 'W') ]
+            #Bottom Corners
+            self.state += [ Cubie(-1,1,-1, cx = 'O', cy = 'Y', cz = 'B'), Cubie(1,1,-1, cx = 'R', cy = 'Y', cz = 'B'), Cubie(-1,-1,-1, cx = 'O', cy = 'G', cz = 'B'), Cubie(1,-1,-1, cx = 'R', cy = 'G', cz = 'B') ]
+            #Top Edges
+            self.state += [ Cubie(-1,0,1, cx = 'O', cz = 'W'), Cubie(0,1,1, cy = 'Y', cz = 'W'), Cubie(1,0,1, cx = 'R', cz = 'W'), Cubie(0,-1,1, cy = 'G', cz = 'W') ]
+            #Middle Edges
+            self.state += [ Cubie(-1,1,0, cx = 'O', cy = 'Y'), Cubie(1,1,0, cx = 'R', cy = 'Y'), Cubie(1,-1,0, cx = 'R', cy = 'G'), Cubie(-1,-1,0, cx = 'O', cy = 'G') ]
+            #Bottom Edges
+            self.state += [ Cubie(-1,0,-1, cx = 'O', cz = 'B'), Cubie(0,1,-1, cy = 'Y', cz = 'B'), Cubie(1,0,-1, cx = 'R', cz = 'B'), Cubie(0,-1,-1, cy = 'G', cz = 'B') ]
             
-        if direction == 'left':
-            left[rowcolumn] = self.state[self.FACE][rowcolumn][:]
-            face[rowcolumn] = self.state[self.RIGHT][rowcolumn][:]
-            right[rowcolumn] = self.state[self.BACK][rowcolumn][:]
-            back[rowcolumn] = self.state[self.LEFT][rowcolumn][:]
 
-            if rowcolumn == 0:
-                top = self.__cwQuarterTurn(top)
+    def __eq__(self,other):
+       return all( [ x[0] == x[1] for x in zip( self.state, other.state  )  ] )
 
-            if rowcolumn == self.size - 1:
-                bottom = self.__ccwQuarterTurn(bottom)
-
-        if direction == 'right':
-            left[rowcolumn] = self.state[self.BACK][rowcolumn][:]
-            face[rowcolumn] = self.state[self.LEFT][rowcolumn][:]
-            right[rowcolumn] = self.state[self.FACE][rowcolumn][:]
-            back[rowcolumn] = self.state[self.RIGHT][rowcolumn][:]
-
-            if rowcolumn == 0:
-                top = self.__ccwQuarterTurn(top)
-
-            if rowcolumn == self.size - 1:
-                bottom = self.__cwQuarterTurn(bottom)
-
-        self.state[self.TOP]  = top
-        self.state[self.LEFT]  = left
-        self.state[self.FACE]  = face
-        self.state[self.RIGHT]  = right
-        self.state[self.BOTTOM]  = bottom
-        self.state[self.BACK]  = back
-
+    #direction = 1 for clockwise rotation, -1 for ccw rotation
+    def rotate(self,face,direction):
+        assert face in ('F','L','R','B','U','D')
+        if face == 'F':
+            for cubie in [ x for x in self.state if x.y == -1 ]:
+                cubie.x, cubie.z, cubie.cx, cubie.cz = direction*cubie.z, -1*direction*cubie.x, cubie.cz, cubie.cx
+        if face == 'L':
+            for cubie in [ x for x in self.state if x.x == -1 ]:
+                cubie.y, cubie.z, cubie.cy, cubie.cz = -1*direction*cubie.z, direction*cubie.y, cubie.cz, cubie.cy
+        if face == 'R':
+            for cubie in [ x for x in self.state if x.x == 1 ]:
+                cubie.y, cubie.z, cubie.cy, cubie.cz = -1*direction*cubie.z, direction*cubie.y, cubie.cz, cubie.cy
+        if face == 'B':
+            for cubie in [ x for x in self.state if x.y == 1 ]:
+                cubie.x, cubie.z, cubie.cx, cubie.cz = direction*cubie.z, -1*direction*cubie.x, cubie.cz, cubie.cx
+        if face == 'U':
+            for cubie in [ x for x in self.state if x.z == 1 ]:
+                cubie.x, cubie.y, cubie.cx, cubie.cy = direction*cubie.y, -1*direction*cubie.x, cubie.cy, cubie.cx
+        if face == 'D':
+            for cubie in [ x for x in self.state if x.z == -1 ]:
+                cubie.x, cubie.y, cubie.cx, cubie.cy = direction*cubie.y, -1*direction*cubie.x, cubie.cy, cubie.cx
 
     def randomize(self,n):
         actions = self.getActions()
         while n>0:
             i = random.randrange(len(actions))
-            if actions[i][0] in ('up','down','left','right'):
-                self.move(actions[i][0],actions[i][1])
-            else:
-                self.rotate(actions[i][1])
+            print(actions[i])
+            self.rotate(actions[i][0],actions[i][1])
             n -= 1
 
     def getActions(self):
-        actions = [ ('up', x) for x in range(self.size) ]
-        actions += [ ('down', x) for x in range(self.size) ]
-        actions += [ ('left', x) for x in range(self.size) ]
-        actions += [ ('right', x) for x in range(self.size) ]
-        actions += [ ('rotate','up'), ('rotate','down'), ('rotate','left'),('rotate','right') ]
+        actions = [ (x,y) for x in ('F','L','R','B','U','D') for y in (-1,1)]
         return actions
 
 
     def __str__(self):
-        s = ' '*(self.size+1) + '-' + '-'*self.size + '-' + '\n'
-        for i in range(self.size):
-            s += ' '*(self.size+1) + '|' + ''.join([str(x) for x in self.state[self.TOP][i]]) + '|\n'
+        s = ' '*4 + '-'*5 + '\n'
+        for i in (1,0,-1):
+            s += ' '*4 + '|' + ''.join([ x.cz for x in self.state if x.z == 1 and x.y == i ]) + '|\n'
 
-        s += '-' + '-'*(self.size*4+3) + '-\n'
-        for i in range(self.size):
-            s += '|' + ''.join([str(x) for x in self.state[self.LEFT][i]]) + '|' + ''.join([str(x) for x in self.state[self.FACE][i]]) + '|' + ''.join([str(x) for x in self.state[self.RIGHT][i]]) + '|' + ''.join([str(x) for x in self.state[self.BACK][i]]) + '|\n'
+        s += '-' + '-'*15 + '-\n'
+        for i in (1,0,-1):
+            s += '|' + ''.join([ x.cx for x in self.state if x.x == -1 and x.z == i ]) + '|' + ''.join([ x.cy for x in self.state if x.y == -1 and x.z == i ]) + '|' + ''.join([ x.cx for x in self.state if x.x == 1 and x.z == i ]) + '|' + ''.join([ x.cy for x in self.state if x.y == 1 and x.z == i ]) + '|\n'
         
-        s += '-' + '-'*(self.size*4+3) + '-\n'
-        for i in range(self.size):
-            s += ' '*(self.size+1) + '|' + ''.join([str(x) for x in self.state[self.BOTTOM][i]]) + '|\n'
+        s += '-' + '-'*15 + '-\n'
+        for i in (-1,0,1):
+            s += ' '*4 + '|' + ''.join([ x.cz for x in self.state if x.z == -1 and x.y == i ]) + '|\n'
        
-        s += ' '*(self.size+1) + '-' + '-'*self.size + '-' + '\n'
+        s += ' '*4 + '-'*5 + '\n'
 
         return s
-
-
