@@ -64,7 +64,6 @@ class RubikCube:
         actions = self.getActions()
         while n>0:
             i = random.randrange(len(actions))
-            print(actions[i])
             self.rotate(actions[i][0],actions[i][1])
             n -= 1
 
@@ -76,15 +75,15 @@ class RubikCube:
     def __str__(self):
         s = ' '*4 + '-'*5 + '\n'
         for i in (1,0,-1):
-            s += ' '*4 + '|' + ''.join([ x.cz for x in self.state if x.z == 1 and x.y == i ]) + '|\n'
+            s += ' '*4 + '|' + ''.join([ x.cz for x in sorted(self.state,key=lambda x: x.x) if x.z == 1 and x.y == i ]) + '|\n'
 
         s += '-' + '-'*15 + '-\n'
         for i in (1,0,-1):
-            s += '|' + ''.join([ x.cx for x in self.state if x.x == -1 and x.z == i ]) + '|' + ''.join([ x.cy for x in self.state if x.y == -1 and x.z == i ]) + '|' + ''.join([ x.cx for x in self.state if x.x == 1 and x.z == i ]) + '|' + ''.join([ x.cy for x in self.state if x.y == 1 and x.z == i ]) + '|\n'
+            s += '|' + ''.join([ x.cx for x in sorted(self.state,key=lambda x: x.y,reverse=True) if x.x == -1 and x.z == i ]) + '|' + ''.join([ x.cy for x in sorted(self.state,key=lambda x: x.x) if x.y == -1 and x.z == i ]) + '|' + ''.join([ x.cx for x in sorted(self.state,key=lambda x: x.y) if x.x == 1 and x.z == i ]) + '|' + ''.join([ x.cy for x in sorted(self.state,key=lambda x: x.x) if x.y == 1 and x.z == i ]) + '|\n'
         
         s += '-' + '-'*15 + '-\n'
         for i in (-1,0,1):
-            s += ' '*4 + '|' + ''.join([ x.cz for x in self.state if x.z == -1 and x.y == i ]) + '|\n'
+            s += ' '*4 + '|' + ''.join([ x.cz for x in sorted(self.state,key=lambda x: x.x) if x.z == -1 and x.y == i ]) + '|\n'
        
         s += ' '*4 + '-'*5 + '\n'
 
